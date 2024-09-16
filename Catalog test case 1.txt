@@ -1,0 +1,72 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+// Function to decode a value from a given base to decimal
+int decodeValue(const string &value, int base) {
+    int decoded = 0;
+    for (char digit : value) {
+        decoded = decoded * base + (digit - '0');
+    }
+    return decoded;
+}
+
+// Function to perform Lagrange interpolation
+double lagrangeInterpolation(const vector<pair<int, int>> &points, int k) {
+    double result = 0.0;
+    for (int i = 0; i < k; i++) {
+        double term = points[i].second;
+        for (int j = 0; j < k; j++) {
+            if (i != j) {
+                term *= (0.0 - points[j].first) / (points[i].first - points[j].first);
+            }
+        }
+        result += term;
+    }
+    return result;
+}
+
+int main() {
+    // Input data
+    map<string, map<string, string>> input = {
+        {"keys", {{"n", "4"}, {"k", "3"}}},
+        {"1", {{"base", "10"}, {"value", "4"}}},
+        {"2", {{"base", "2"}, {"value", "111"}}},
+        {"3", {{"base", "10"}, {"value", "12"}}},
+        {"6", {{"base", "4"}, {"value", "213"}}}
+    };
+
+    // Extract number of roots (n) and required points (k)
+    int n = stoi(input["keys"]["n"]);
+    int k = stoi(input["keys"]["k"]);
+
+    // Vector to hold decoded points
+    vector<pair<int, int>> points;
+
+    // Decode and store the points
+    for (auto &entry : input) {
+        if (entry.first != "keys") {
+            int x = stoi(entry.first);
+            int base = stoi(entry.second["base"]);
+            int y = decodeValue(entry.second["value"], base);
+            points.emplace_back(x, y);
+        }
+    }
+
+    // Select first k points
+    vector<pair<int, int>> selectedPoints;
+    for (int i = 0; i < k; ++i) {
+        selectedPoints.push_back(points[i]);
+    }
+
+    // Perform Lagrange interpolation to find the constant term
+    double constantTerm = lagrangeInterpolation(selectedPoints, k);
+
+    // Output the result
+    cout << "The constant term (c) is: " << constantTerm << endl;
+
+    return 0;
+}
